@@ -1,3 +1,4 @@
+from sre_constants import SUCCESS
 import pygame
 from sys import exit
 from random import randint, choice
@@ -7,20 +8,19 @@ import time
 
 
 class handDetector():
-    def __init__(self, mode = False, maxHands = 2, detectionCon = 0.5, trackCon = 0.5):
+    def __init__(self, mode=False, maxHands=1, modelComplexity=1, detectionCon=0.5, trackCon=0.5):
         self.mode = mode
         self.maxHands = maxHands
+        self.modelComplex = modelComplexity
         self.detectionCon = detectionCon
         self.trackCon = trackCon
         self.mpHands = mp.solutions.hands
-        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectionCon, self.trackCon)
+        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.modelComplex,self.detectionCon, self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils
         
     def findHands(self,img, draw = True):
-        imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        self.results = self.hands.process(imgRGB)
-        # print(results.multi_hand_landmarks)
-
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        self.results = self.hands.process(img)
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
@@ -45,7 +45,6 @@ cTime = 0
 cap = cv2.VideoCapture(0)
 detector = handDetector()
 
-
 class Player(pygame.sprite.Sprite):
 	def __init__(self):
 		super().__init__()
@@ -67,7 +66,7 @@ class Player(pygame.sprite.Sprite):
 			self.gravity = -20
 			self.jump_sound.play()
 			flag = False
-		print("grav ",self.rect.y )
+		#print("grav ",self.rect.y )
 
 	def apply_gravity(self):
 		self.gravity += 1
@@ -152,7 +151,7 @@ player.add(Player())
 
 obstacle_group = pygame.sprite.Group()
 
-sky_surface = pygame.image.load('graphics/skyyy.png').convert()
+sky_surface = pygame.image.load('graphics/sky.png').convert()
 ground_surface = pygame.image.load('graphics/ground.png').convert()
 
 # Intro screen
@@ -211,21 +210,19 @@ while True:
 
 		if score == 0: screen.blit(game_message,game_message_rect)
 		else:screen.blit(score_message,score_message_rect)
-	success, img = cap.read()
+	SUCCESS,img = cap.read()
 	img = detector.findHands(img)
 	lmlist = detector.findPosition(img)
 	if len(lmlist) != 0:
-		print(lmlist[4])
+		#print(lmlist[4])
 		flag = True
   
 	cTime = time.time()
 	fps = 1 / (cTime - pTime)
 	pTime = cTime
 
-	cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
-
 	cv2.imshow("Image", img)
 	cv2.waitKey(1)
 	
 	pygame.display.update()
-	clock.tick(60)
+ 
