@@ -229,6 +229,8 @@ while True:
             screen.blit(score_message, score_message_rect)
 
     SUCCESS, img = cap.read()
+    if not SUCCESS or img is None:
+        continue
     img = detector.findHands(img)
     lmlist = detector.findPosition(img)
     if len(lmlist) != 0:
