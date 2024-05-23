@@ -56,7 +56,7 @@ class handDetector():
 
 pTime = 0
 cTime = 0
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 detector = handDetector()
 
 class Player(pygame.sprite.Sprite):
@@ -178,7 +178,7 @@ player_stand_rect = player_stand.get_rect(center=(400, 200))
 game_name = test_font.render('Pixel Runner', False, (111, 196, 169))
 game_name_rect = game_name.get_rect(center=(400, 80))
 
-game_message = test_font.render('Press space to run', False, (111, 196, 169))
+game_message = test_font.render('Start Playin', False, (111, 196, 169))
 game_message_rect = game_message.get_rect(center=(400, 330))
 
 # Timer 

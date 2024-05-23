@@ -18,7 +18,7 @@ class handDetector():
         self.mpDraw = mp.solutions.drawing_utils
 
     def findHands(self, img, draw=True):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
         self.results = self.hands.process(img)
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks:
@@ -27,7 +27,7 @@ class handDetector():
                         self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
         return img
 
-    def findPosition(self, img, handNo=0, draw=True):
+    def findPosition(self, img, handNo=0, draw=False):
         lmlist = []
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNo]
@@ -138,7 +138,7 @@ class Obstacle(pygame.sprite.Sprite):
 def display_score():
     current_time = int(pygame.time.get_ticks() / 1000) - start_time
     score_surf = test_font.render(f'Score: {current_time}', False, (64, 64, 64))
-    score_rect = score_surf.get_rect(center=(400, 50))
+    score_rect = score_surf.get_rect(center=(screen_width / 2, 50))
     screen.blit(score_surf, score_rect)
     return current_time
 
@@ -150,7 +150,13 @@ def collision_sprite():
         return True
 
 pygame.init()
-screen = pygame.display.set_mode((800, 400))
+
+# Set screen dimensions
+screen_info = pygame.display.Info()
+screen_width, screen_height = screen_info.current_w, screen_info.current_h
+game_height = screen_height // 2
+
+screen = pygame.display.set_mode((screen_width, game_height))
 pygame.display.set_caption('Runner')
 clock = pygame.time.Clock()
 test_font = pygame.font.Font('font/Pixeltype.ttf', 50)
@@ -173,15 +179,15 @@ ground_surface = pygame.image.load('graphics/ground.png').convert()
 # Intro screen
 player_stand = pygame.image.load('graphics/player/player_stand.png').convert_alpha()
 player_stand = pygame.transform.rotozoom(player_stand, 0, 2)
-player_stand_rect = player_stand.get_rect(center=(400, 200))
+player_stand_rect = player_stand.get_rect(center=(screen_width / 2, game_height / 2))
 
 game_name = test_font.render('Pixel Runner', False, (111, 196, 169))
-game_name_rect = game_name.get_rect(center=(400, 80))
+game_name_rect = game_name.get_rect(center=(screen_width / 2, 80))
 
-game_message = test_font.render('Press space to run', False, (111, 196, 169))
-game_message_rect = game_message.get_rect(center=(400, 330))
+game_message = test_font.render('Start Playing!', False, (111, 196, 169))
+game_message_rect = game_message.get_rect(center=(screen_width / 2, game_height / 2 + 130))
 
-# Timer 
+# Timer
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer, 1500)
 
@@ -203,7 +209,7 @@ while True:
 
     if game_active:
         screen.blit(sky_surface, (0, 0))
-        screen.blit(ground_surface, (0, 300))
+        screen.blit(ground_surface, (0, game_height - 100))
         score = display_score()
 
         player.draw(screen)
@@ -220,7 +226,7 @@ while True:
         screen.blit(player_stand, player_stand_rect)
 
         score_message = test_font.render(f'Your score: {score}', False, (111, 196, 169))
-        score_message_rect = score_message.get_rect(center=(400, 330))
+        score_message_rect = score_message.get_rect(center=(screen_width / 2, game_height / 2 + 130))
         screen.blit(game_name, game_name_rect)
 
         if score == 0:
@@ -231,7 +237,6 @@ while True:
     SUCCESS, img = cap.read()
     if not SUCCESS or img is None:
         continue
-
     img = detector.findHands(img)
     lmlist = detector.findPosition(img)
     if len(lmlist) != 0:
@@ -242,7 +247,11 @@ while True:
     fps = 1 / (cTime - pTime)
     pTime = cTime
 
-    cv2.imshow("Image", img)
+    # Resize and display the camera feed to fit the lower half of the screen
+    img = cv2.resize(img, (screen_width, game_height))
+    cv2.imshow("Hand Detection", img)
+    cv2.moveWindow("Hand Detection", 0, game_height)  # Position the window at the bottom half of the screen
+
     cv2.waitKey(1)
 
     pygame.display.update()
