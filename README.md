@@ -12,4 +12,4 @@ For webcam that connects through HDMI
 cap = cv2.VideoCapture(1)
 
 :))) happy gaming.
-[![Watch the video](https://raw.githubusercontent.com/nadinegp/Flappy-OpenCV-Game/main/Video.mp4)] 
+[![Watch the video](https://raw.githubusercontent.com/nadinegp/Flappy-OpenCV-Game/main/Video)] 
